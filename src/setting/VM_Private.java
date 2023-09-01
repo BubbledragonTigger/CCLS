@@ -17,7 +17,7 @@ public class VM_Private extends VM{
         public static  double INTERVAL = 3600;    //one hour, billing interval
 
         public static  int FASTEST = 8;
-        public static  int SLOWEST = 0;
+        public static  int SLOWEST = ProjectCofig.privateVMComputeSpeedID;
 
         private int id;
         private int type;
@@ -37,7 +37,7 @@ public class VM_Private extends VM{
 
         //------------------------getters && setters---------------------------
         public double getSpeed() {
-            return SPEEDS[0];
+            return SPEEDS[ProjectCofig.privateVMComputeSpeedID];
         }
 
         public double getUnitCost() {

@@ -38,7 +38,9 @@ public class Workflow {
         } catch (Exception e) {    // convert non-RuntimeExceptions to RuntimeException
             throw new RuntimeException("fails to parse " + file);
         }
-        System.out.println("succeed to read a workflow from " + file);
+        //分配跨云带宽
+        Channel.transferSpeed = ProjectCofig.vmInterNetworkSpeed;
+        /*System.out.println("succeed to read a workflow from " + file);*/
         list = topoSort(list.get(0));   //为什么先拓扑排序后按gamma排序，直接gamma排序不行吗。后续懂了：gamma排序也是基于拓扑排序
         ProjectCofig.bound=list.size()-2;//减去入口和出口虚拟节点
 
@@ -50,16 +52,14 @@ public class Workflow {
 
             Task t = list.get(i);
             if(t.getOutEdges().size()>maxOutd) maxOutd = t.getOutEdges().size();
-
         }
-
         //only used in Clevel
         Workflow.maxOutd = maxOutd;
-        c_levels = new TProperties(this,ProjectCofig.type);
+        /*c_levels = new TProperties(this,ProjectCofig.type);
         Collections.sort(list, c_levels);
-        Collections.reverse(list);
-        System.out.println("topological sort and clevel");
-        /*for (Task t : list)
+        Collections.reverse(list);*/
+        //System.out.println("topological sort and clevel");
+       /* for (Task t : list)
             System.out.println(t.getName() + "\t" + c_levels.get(t));*/
 
         for(int i = 0;i< list.size();i++){
@@ -87,10 +87,10 @@ public class Workflow {
         //设置CCR
         setCCRInHybridCloud();
         //序列长度
-        System.out.println("CCR is " + CCR);
+        /*System.out.println("CCR is " + CCR);*/
         setSequentialLength();
-        System.out.println("workflow's sequentialLength is " + sequentialLength);
-        System.out.println("workflow's critial task path:"+ getCPTaskLength());
+        /*System.out.println("workflow's sequentialLength is " + sequentialLength);
+        System.out.println("workflow's critial task path:"+ getCPTaskLength());*/
     }
 
 
@@ -137,7 +137,8 @@ public class Workflow {
                 task.setPrivateAttribute(false);
 
                 if(task.getName().equals("exit") || task.getName().equals("entry")) continue;
-                Integer number=Integer.valueOf(task.getName().substring(2));
+                //截取最后四个字符
+                Integer number=Integer.valueOf(task.getName().substring(task.getName().length()-4));
                 if(set.contains(number)){
                     if(ProjectCofig.adaptorType!=2)task.setRunOnPrivateOrPublic(true);
                     task.setPrivateAttribute(true);
@@ -264,7 +265,7 @@ public class Workflow {
             }
         }
         CCR = edgeSizeSum / edgeNum / Channel.getTransferSpeed();
-        System.out.println((sensitiveTaskSizeSum / VM_Private.SPEEDS[VM_Private.SLOWEST])/sensitiveTaskNumber);
+        /*System.out.println("CCR:"+(sensitiveTaskSizeSum / VM_Private.SPEEDS[VM_Private.SLOWEST])/sensitiveTaskNumber);*/
         CCR = CCR / ((sensitiveTaskSizeSum / VM_Private.SPEEDS[VM_Private.SLOWEST])/sensitiveTaskNumber
                 +(insensitiveTaskSizeSum/VM_Public.SPEEDS[VM_Public.FASTEST])/insensitiveTaskNumber);
     }

@@ -72,7 +72,7 @@ public class WorkflowParser {
 				boolean flag = true;
 				for(Edge outEdge : source.getOutEdges()){
 					if(outEdge.getDestination() == destination){
-						outEdge.setDataSize(td.getSize());			//bind here
+						outEdge.setDataSize(td.getSize()*8);			//bind here
 						flag = false;
 					}
 				}
@@ -80,7 +80,7 @@ public class WorkflowParser {
 				//flag to indicate whether this problem exists
 				if(flag == true){
 					Edge e = new Edge(source, destination);
-					e.setDataSize(td.getSize());
+					e.setDataSize(td.getSize()*8);
 					source.insertEdge(Task.TEdges.OUT, e);
 					destination.insertEdge(Task.TEdges.IN, e);
 					//System.out.println("**************add a control flow*******************source: "

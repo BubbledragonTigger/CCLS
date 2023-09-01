@@ -13,77 +13,73 @@ import java.util.stream.Collectors;
 public class WorkflowParser2 {
 	//------------------???JSON??? start----------------
 	class CFile{
-		String link, name, size;
+		String link, name, sizeInBytes;
 	}
 	class Job{
-		String name, runtime;	//type
-		ArrayList<String> children;//parents??????????????
-		ArrayList<CFile> files; 
+		String name,id, runtimeInSeconds;	//type
+		ArrayList<String> parents;
+		ArrayList<CFile> files;
 	}
 	class WF{	//???????Workflow????????????
-		ArrayList<Job> jobs;
-//		String executedAt,makespan;	ArrayList<String> machines;
-	}	
+		ArrayList<Job> tasks;
+		//String executedAt,makespan;	ArrayList<String> machines;
+	}
 	class JSONFile{	//???????????????
 		String name;	//?????????????
 		WF workflow;	//?????workflow???????wf
-//		Author author;	//class Author{ String name, email;}
-//		String description, createdAt, schemaVersion;ArrayList<String>  wms;
+		//Author author;	//class Author{ String name, email;}
+		//String description, createdAt, schemaVersion;ArrayList<String>  wms;
 	}
 	public static List<Task> parseJSONFile(String file) throws IOException {
 		Gson gson = new Gson();
 		Reader reader = new FileReader(file);
 		JSONFile json = gson.fromJson(reader, JSONFile.class);
-		System.out.println("????????????"+json.name);
-		 
-		ArrayList<Job> jobs = json.workflow.jobs;
-		 
+		ArrayList<Job> jobs = json.workflow.tasks;
+
 		List<Task> list = new ArrayList<>();
 		HashMap<String, Task> nameTaskMapping = new HashMap<String, Task>();
 		HashMap<String, Job> nameJobMapping = new HashMap<String, Job>();
 		for(Job job : jobs){	//????飬??????????tasks
-			Task task = new Task(job.name, Double.parseDouble(job.runtime));
+			Task task = new Task(job.name, Double.parseDouble(job.runtimeInSeconds));
 			list.add(task);
 			nameTaskMapping.put(job.name, task);
 			nameJobMapping.put(job.name, job);
 		}
 		for(Job job : jobs){	//????飬????task?????
 			Task task = nameTaskMapping.get(job.name);
-			List<CFile> outFiles = job.files.stream()
-					.filter(e -> e.link.equals("output"))
+			List<CFile> inFiles = job.files.stream()
+					.filter(e -> e.link.equals("input"))
 					.collect(Collectors.toList());
 //			outFiles.forEach(e -> System.out.println(e.link)); //test
-			for(String child : job.children){
-				Task childTask = nameTaskMapping.get(child);
-				Job childJob = nameJobMapping.get(child);
-				Edge e = new Edge(task, childTask);
-				
-				List<CFile> inFiles = childJob.files.stream()
-						.filter(t -> t.link.equals("input"))
+			for(String parent : job.parents){
+				Task parentTask = nameTaskMapping.get(parent);
+				Job parentJob = nameJobMapping.get(parent);
+				Edge e = new Edge(parentTask, task);
+
+				List<CFile> outFiles = parentJob.files.stream()
+						.filter(t -> t.link.equals("output"))
 						.collect(Collectors.toList());
 				double weight = 0;
 				int i = 0;
 				for(CFile outFile : outFiles){
 					for(CFile inFile : inFiles){
 						if(outFile.name.equals(inFile.name)){
-							weight += Double.parseDouble(outFile.size);
+							weight += Double.parseDouble(outFile.sizeInBytes);
 							i++;
 							break;
 						}
 					}
 				}
-//				System.out.println(i);	//	test??????????1
-				
-				e.setDataSize((long)(weight*1000));
-				task.insertEdge(Task.TEdges.OUT, e);
-				childTask.insertEdge(Task.TEdges.IN, e);
+				e.setDataSize((long)(weight)*8);
+				task.insertEdge(Task.TEdges.IN, e);
+				parentTask.insertEdge(Task.TEdges.OUT, e);
 			}
 		}
 		WorkflowParser.addDummyTasks(list);
 		return list;
 	}
 	//------------------???JSON??? end----------------
-	
+
 	public static void main(String[] args) throws IOException{
 		parseJSONFile("D:\\seismology-workflow.json");
 	}

@@ -109,6 +109,13 @@ public class ChannelSolution {
                 break;
             }
         }
+        if(ProjectCofig.adaptorType==2){  //针对复制调度
+            for (TAllocation tAllocation : tAllocations) {
+                if (tAllocation.getTask() == task) {
+                    selectedTAllocation = tAllocation;
+                }
+            }
+        }
         return selectedTAllocation;
     }
 

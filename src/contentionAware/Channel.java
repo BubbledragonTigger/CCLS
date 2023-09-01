@@ -43,7 +43,7 @@ public class Channel {
     private static HashMap<Double,Edge> hashMapDownloadFinishTime ;
 
     //跨云10m
-    private final static double transferSpeed = ProjectCofig.vmInterNetworkSpeed;
+    public static double transferSpeed ;
     //private final static double transferSpeed = 1;
 
     //---------------------getter and setter-----------

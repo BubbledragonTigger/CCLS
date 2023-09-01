@@ -20,7 +20,7 @@ public class VM_Public extends VM{
     public static final double[] UNIT_COSTS = {0.12, 0.195, 0.28, 0.375, 0.48, 0.595, 0.72, 0.855, 1};
     public static final double INTERVAL = 3600;	//one hour, billing interval
 
-    public static final int FASTEST = 8;
+    public static int FASTEST = ProjectCofig.publicVMComputeSpeedID;
     public static final int SLOWEST = 0;
 
     private int id = 0;
@@ -35,7 +35,7 @@ public class VM_Public extends VM{
     public String ClassName = "PublicVM";
     //------------------------getters && setters---------------------------
     public double getSpeed() {
-        return SPEEDS[8];
+        return SPEEDS[ProjectCofig.publicVMComputeSpeedID];
     }
 
     public double getUnitCost() {

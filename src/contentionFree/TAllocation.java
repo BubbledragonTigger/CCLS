@@ -1,9 +1,6 @@
 package contentionFree;
 
-import setting.Task;
-import setting.VM;
-import setting.VM_Private;
-import setting.VM_Public;
+import setting.*;
 
 import java.util.Objects;
 
@@ -113,10 +110,10 @@ public class TAllocation extends Allocation {
 		this.startTime = startTime;
 		//this.finishTime = startTime + task.getTaskSize() / VM.SPEEDS[vmId];
 		if(task.getRunOnPrivateOrPublic() == true){
-			this.finishTime = startTime + task.getTaskSize() / VM.SPEEDS[VM.SLOWEST];
+			this.finishTime = startTime + task.getTaskSize() / VM_Private.SPEEDS[ProjectCofig.privateVMComputeSpeedID];
 		}
 		else{
-			this.finishTime = startTime + task.getTaskSize() / VM.SPEEDS[VM.FASTEST];
+			this.finishTime = startTime + task.getTaskSize() / VM_Public.SPEEDS[ProjectCofig.publicVMComputeSpeedID];
 		}
 
 	}

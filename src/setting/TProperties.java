@@ -1,5 +1,6 @@
 package setting;
 
+import com.sun.javafx.scene.web.Debugger;
 import contentionAware.Channel;
 
 import java.util.ArrayList;
@@ -14,7 +15,8 @@ public class TProperties extends HashMap<Task,Double> implements Comparator<Task
     //TProperties Type
 
 
-    public static enum Type{B_LEVEL, T_LEVEL, S_LEVEL, PU_RANK, GAMMA, PEFT, IPPTS, C_LEVEL}
+    //public static enum Type{B_LEVEL, T_LEVEL, S_LEVEL, PU_RANK, GAMMA, PEFT, IPPTS, C_LEVEL}
+    public static enum Type{ C_LEVEL,B_LEVEL, T_LEVEL, S_LEVEL, PU_RANK, GAMMA, PEFT, IPPTS}
     Workflow wf;
 
     public TProperties(Workflow wf, Type type){
@@ -33,16 +35,19 @@ public class TProperties extends HashMap<Task,Double> implements Comparator<Task
                 Task task = wf.get(j);
                 for(Edge outEdge : task.getOutEdges()){
                     Double childBLevel = this.get(outEdge.getDestination());
-                    bLevel = Math.max(bLevel,childBLevel + outEdge.getDataSize() / VM.NETWORK_SPEED);
-
+                    /*bLevel = Math.max(bLevel,childBLevel + (outEdge.getDataSize() / VM.NETWORK_SPEED+
+                            outEdge.getDataSize() /Channel.getTransferSpeed())/2);*/
+                    bLevel = Math.max(bLevel,childBLevel +outEdge.getDataSize() / VM.NETWORK_SPEED);
                 }
-                if(task.getprivateAttribute() == true){
-                    bLevel = bLevel + VM_Private.SPEEDS[VM_Private.SLOWEST];
+                bLevel = bLevel +(task.getTaskSize()/VM_Public.SPEEDS[VM_Public.FASTEST]);/*+
+                        task.getTaskSize()/VM_Private.SPEEDS[VM_Private.SLOWEST])/2;*/
+                /*if(task.getprivateAttribute()==true){
+                    bLevel = bLevel + task.getTaskSize()/VM_Private.SPEEDS[VM_Private.SLOWEST];
                 }
                 else{
-                    bLevel = bLevel + VM_Public.SPEEDS[VM_Public.FASTEST];
-                }
-
+                    bLevel = bLevel + (task.getTaskSize()/VM_Private.SPEEDS[VM_Private.SLOWEST]
+                            +task.getTaskSize()/VM_Public.SPEEDS[VM_Public.FASTEST])/2;
+                }*/
                 this.put(task , bLevel);
             }
         }else if(type == Type.S_LEVEL){     //应用于混合云时应考虑任务的隐私属性
@@ -160,8 +165,12 @@ public class TProperties extends HashMap<Task,Double> implements Comparator<Task
                     }
                     task.setOCT(privateVMOCT, publicVMOCT);
                     double rankOCT = (privateVMOCT + publicVMOCT) /2+maxSuccTaskRankOct;
-
-                    this.put(task,rankOCT);
+                    double maxChildOCTrank = 0;
+                    for (Edge outEdge : task.getOutEdges()) {
+                        Task child = outEdge.getDestination();
+                        maxChildOCTrank = Math.max(this.get(child), maxChildOCTrank);
+                    }
+                    this.put(task,rankOCT+maxChildOCTrank);
                 }
         }else if(type == Type.IPPTS){
             //这里和原算法IPPTS不太一样，因为我们的处理器数量是无法提前确定的
@@ -188,10 +197,10 @@ public class TProperties extends HashMap<Task,Double> implements Comparator<Task
                     Task succTask = outEdge.getDestination();
                     double succTaskPrivateVMPCM = succTask.getPCM()[0];
                     double succTaskPublicVMPCM = succTask.getPCM()[1];
-                    double succTaskPrivateWeight = succTask.getTaskSize()/VM_Private.SPEEDS[0];
-                    double succTaskPublicWeight = succTask.getTaskSize()/VM_Public.SPEEDS[8];
-                    double taskPrivateWeight = task.getTaskSize()/VM_Private.SPEEDS[0];
-                    double taskPublicWeight = task.getTaskSize()/VM_Public.SPEEDS[8];
+                    double succTaskPrivateWeight = succTask.getTaskSize()/VM_Private.SPEEDS[ProjectCofig.privateVMComputeSpeedID];
+                    double succTaskPublicWeight = succTask.getTaskSize()/VM_Public.SPEEDS[ProjectCofig.publicVMComputeSpeedID];
+                    double taskPrivateWeight = task.getTaskSize()/VM_Private.SPEEDS[ProjectCofig.privateVMComputeSpeedID];
+                    double taskPublicWeight = task.getTaskSize()/VM_Public.SPEEDS[ProjectCofig.publicVMComputeSpeedID];
 
                     //跨云传输时长
                     double transferCloud = outEdge.getDataSize()/ Channel.getTransferSpeed();
@@ -265,35 +274,41 @@ public class TProperties extends HashMap<Task,Double> implements Comparator<Task
 
                     clevel +=task.getTaskSize()/VM_Private.SPEEDS[VM_Private.SLOWEST];
                     double outdData = 0;  //结果乘outd
+                    double maxInnerCloudTime = 0.0;
+                    double sumInterCloudTIme = 0.0;
                     for(Edge outEdge: task.getOutEdges()) {
                         Task succTask = outEdge.getDestination();
-                        if(succTask.getRunOnPrivateOrPublic()== true) {
-                            outdData += outEdge.getDataSize() / VM.NETWORK_SPEED;
+                        if(succTask.getprivateAttribute()== true) {
+                            maxInnerCloudTime = Math.max(maxInnerCloudTime, outEdge.getDataSize() / VM.NETWORK_SPEED);
 
                         }
                         else {
-                            outdData += outEdge.getDataSize() / Channel.getTransferSpeed();
+                            sumInterCloudTIme += outEdge.getDataSize() / Channel.getTransferSpeed();
                         }
                     }
+                    outdData = Math.max(maxInnerCloudTime,sumInterCloudTIme);
                     if(task.getOutEdges() != null || task.getOutEdges().size() !=0 ){
-                        outdData = outdData*(1+task.getOutEdges().size()/maxOutd);
+                        outdData = outdData*(1+task.getOutEdges().size()*1.0/maxOutd);
                     }
                     clevel +=outdData;
                 }
                 else{
                     clevel +=task.getTaskSize()/VM_Public.SPEEDS[VM_Public.FASTEST];
                     double outdData = 0;  //结果乘outd
+                    double maxInnerCloudTime = 0.0;
+                    double sumInterCloudTIme = 0.0;
                     for(Edge outEdge: task.getOutEdges()) {
                         Task succTask = outEdge.getDestination();
-                        if(succTask.getprivateAttribute() == false) {
-                            outdData += outEdge.getDataSize() / VM.NETWORK_SPEED;
+                        if(succTask.getRunOnPrivateOrPublic()== false) {
+                            maxInnerCloudTime = Math.max(maxInnerCloudTime, outEdge.getDataSize() / VM.NETWORK_SPEED);
                         }
                         else {
-                            outdData += outEdge.getDataSize() / Channel.getTransferSpeed();
+                            sumInterCloudTIme += outEdge.getDataSize() / Channel.getTransferSpeed();
                         }
                     }
+                    outdData = Math.max(maxInnerCloudTime,sumInterCloudTIme);
                     if(task.getOutEdges() != null && task.getOutEdges().size() !=0 ){
-                        outdData = outdData*(1+task.getOutEdges().size()/maxOutd);
+                        outdData = outdData*(1+task.getOutEdges().size()*1.0/maxOutd);
                     }
                     clevel +=outdData;
                 }

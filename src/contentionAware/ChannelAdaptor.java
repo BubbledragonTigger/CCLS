@@ -243,7 +243,7 @@ public class ChannelAdaptor {
      * @param wf
      * @return
      */
-    public ChannelSolution buildFromSolutionShared(ChannelSolution channelSolution, Workflow wf){
+    public ChannelSolution buildFromSolutionShared(ChannelSolution channelSolution, Workflow wf ){
         //将PrivateVM和PublicVM转成 VM；
         for(TAllocation tAllocation: channelSolution.gettAllocations()){
             if(tAllocation.getPrivateVM() != null)
@@ -251,6 +251,13 @@ public class ChannelAdaptor {
             else
                 tAllocation.setVM(tAllocation.getPublicVM());
         }
+        //复制情况下的共享调度
+        /*if(ProjectCofig.adaptorType==2){
+            for(TAllocation tAllocation: channelSolution.gettAllocations()){
+
+            }
+        }*/
+
 
 
         ChannelSolution newChannelSolution = new ChannelSolution();
@@ -412,7 +419,7 @@ public class ChannelAdaptor {
             ingallEdgeSnaps.addAll(ingEdgeSnaps);
         }
 
-        System.out.println(" adaptorShared finished");
+        /*System.out.println(" adaptorShared finished");*/
         return newChannelSolution;
     }
 

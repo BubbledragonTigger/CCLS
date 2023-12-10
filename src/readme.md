@@ -18,7 +18,7 @@ All parameter settings are placed in the *ProjectCofig.java* class under the *se
 
 ## Starter
 
-Run the *Evaluation. java* file in the *contentAware* directory
+Run the *TestExample*, *TestMakespan* file in the *test* directory
 
 ## Workflows that can be read
 

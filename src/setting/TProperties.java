@@ -30,16 +30,60 @@ public class TProperties extends HashMap<Task,Double> implements Comparator<Task
          */
         double speed=VM.SPEEDS[VM.FASTEST];;
         if(type == Type.B_LEVEL){
-            for(int j= wf.size()-1; j>=0; j--){
-                double bLevel = 0;
-                Task task = wf.get(j);
-                for(Edge outEdge : task.getOutEdges()){
-                    Double childBLevel = this.get(outEdge.getDestination());
+            if(ProjectCofig.betaType == 1){
+                for (int j = wf.size() - 1; j >= 0; j--) {
+                    double bLevel = 0;
+                    Task task = wf.get(j);
+                    for (Edge outEdge : task.getOutEdges()) {
+                        Double childBLevel = this.get(outEdge.getDestination());
+//                        bLevel = Math.max(bLevel,childBLevel + (outEdge.getDataSize() / VM.NETWORK_SPEED+
+//                            outEdge.getDataSize() /Channel.getTransferSpeed())/2);
+                        bLevel = Math.max(bLevel, childBLevel + outEdge.getDataSize() / VM.NETWORK_SPEED);
+                    }
+                    bLevel = bLevel + (task.getTaskSize() / VM_Public.SPEEDS[VM_Public.FASTEST]+
+                        task.getTaskSize()/VM_Private.SPEEDS[VM_Private.SLOWEST])/2;
+                /*if(task.getprivateAttribute()==true){
+                    bLevel = bLevel + task.getTaskSize()/VM_Private.SPEEDS[VM_Private.SLOWEST];
+                }
+                else{
+                    bLevel = bLevel + (task.getTaskSize()/VM_Private.SPEEDS[VM_Private.SLOWEST]
+                            +task.getTaskSize()/VM_Public.SPEEDS[VM_Public.FASTEST])/2;
+                }*/
+                    this.put(task, bLevel);
+                }
+            }
+            else if(ProjectCofig.betaType == 0 && ProjectCofig.adaptorType==2){
+                for (int j = wf.size() - 1; j >= 0; j--) {
+                    double bLevel = 0;
+                    Task task = wf.get(j);
+                    for (Edge outEdge : task.getOutEdges()) {
+                        Double childBLevel = this.get(outEdge.getDestination());
+                        bLevel = Math.max(bLevel,childBLevel + (outEdge.getDataSize() / VM.NETWORK_SPEED+
+                              outEdge.getDataSize() /Channel.getTransferSpeed())/2);
+                        bLevel = Math.max(bLevel, childBLevel + outEdge.getDataSize() / VM.NETWORK_SPEED);
+                    }
+                    bLevel = bLevel + task.getTaskSize() / VM_Public.SPEEDS[VM_Public.FASTEST];
+                           /* + task.getTaskSize()/VM_Private.SPEEDS[VM_Private.SLOWEST])/2;*/
+                    /*if (task.getprivateAttribute() == true) {
+                        bLevel = bLevel + task.getTaskSize() / VM_Private.SPEEDS[VM_Private.SLOWEST];
+                    } else {
+                        bLevel = bLevel + (task.getTaskSize() / VM_Private.SPEEDS[VM_Private.SLOWEST]
+                                + task.getTaskSize() / VM_Public.SPEEDS[VM_Public.FASTEST]) / 2;
+                    }*/
+                    this.put(task, bLevel);
+                }
+            }
+            else{
+                for (int j = wf.size() - 1; j >= 0; j--) {
+                    double bLevel = 0;
+                    Task task = wf.get(j);
+                    for (Edge outEdge : task.getOutEdges()) {
+                        Double childBLevel = this.get(outEdge.getDestination());
                     /*bLevel = Math.max(bLevel,childBLevel + (outEdge.getDataSize() / VM.NETWORK_SPEED+
                             outEdge.getDataSize() /Channel.getTransferSpeed())/2);*/
-                    bLevel = Math.max(bLevel,childBLevel +outEdge.getDataSize() / VM.NETWORK_SPEED);
-                }
-                bLevel = bLevel +(task.getTaskSize()/VM_Public.SPEEDS[VM_Public.FASTEST]);/*+
+                        bLevel = Math.max(bLevel, childBLevel + outEdge.getDataSize() / VM.NETWORK_SPEED);
+                    }
+                    bLevel = bLevel + (task.getTaskSize() / VM_Public.SPEEDS[VM_Public.FASTEST]);/*+
                         task.getTaskSize()/VM_Private.SPEEDS[VM_Private.SLOWEST])/2;*/
                 /*if(task.getprivateAttribute()==true){
                     bLevel = bLevel + task.getTaskSize()/VM_Private.SPEEDS[VM_Private.SLOWEST];
@@ -48,7 +92,8 @@ public class TProperties extends HashMap<Task,Double> implements Comparator<Task
                     bLevel = bLevel + (task.getTaskSize()/VM_Private.SPEEDS[VM_Private.SLOWEST]
                             +task.getTaskSize()/VM_Public.SPEEDS[VM_Public.FASTEST])/2;
                 }*/
-                this.put(task , bLevel);
+                    this.put(task, bLevel);
+                }
             }
         }else if(type == Type.S_LEVEL){     //应用于混合云时应考虑任务的隐私属性
             for(int j= wf.size()-1; j>=0; j--){

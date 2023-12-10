@@ -9,15 +9,15 @@ import java.util.List;
 
 public class Evaluation {
     public static void main(String[] args) throws IOException {
-        //test("D:\\workflowSamples\\MONTAGE\\MONTAGE.n.100.0.dax",false);  //真实工作流
+        System.out.println(test(ProjectCofig.path, false));  //真实工作流
         //calMakespanBasedOnBeta();
-        /*for(int i = 4;i<8;i++){
-            ProjectCofig.beta = 0.05+i*1.0/20.0;
-            //48,49
-            int start = 0;
-            int end = 50;
-            calCCLSImprPerc(calCCLSMakespan(start,end),start,end);
-        }*/
+//        for(int i = 0;i<8;i++){
+//            ProjectCofig.beta = 0.05+i*1.0/20.0;
+//            //48,49
+//            int start = 0;
+//            int end = 50;
+//            calCCLSImprPerc(calCCLSMakespan(start,end),start,end);
+//        }
         //calMakespanBasedOnbext;
         /*for(int i = 1;i<=5;i++){
             ProjectCofig.vmInterNetworkSpeed = 10 * 1000*1000*i;
@@ -52,12 +52,12 @@ public class Evaluation {
 
         //runTime
 
-        calMakespan();
+        //calMakespan();
 
     }
 
     //Improvement Percentage
-    private static void calCCLSImprPerc(Double cclsMakespan, int start, int end) throws IOException {
+    public static void calCCLSImprPerc(Double cclsMakespan, int start, int end) throws IOException {
         System.out.println("CCLS-WO  PSLS  PEFT  IPPTS  HEFD");
         TProperties.Type[] types = TProperties.Type.values();
         //non-duplication
@@ -91,7 +91,7 @@ public class Evaluation {
         System.out.println(String.format("%.2f", (1 - cclsMakespan / mean(makespan)) * 100) + " ");
     }
 
-    private static Double calCCLSMakespan(int start, int end) throws IOException {
+    public static Double calCCLSMakespan(int start, int end) throws IOException {
         List<Double> makespan = new ArrayList<>();
         ProjectCofig.type = TProperties.Type.C_LEVEL;
         ProjectCofig.adaptorType = 2;
@@ -103,12 +103,31 @@ public class Evaluation {
         return mean(makespan);
     }
 
+    public static Double calMakespanWithTaskDuplication(int start, int end) throws IOException {
+        List<Double> makespan = new ArrayList<>();
+        ProjectCofig.adaptorType = 2;
+        TProperties.Type[] types = TProperties.Type.values();
+        System.out.println("CCLS");
+        for (TProperties.Type type : types) {
+            if (type == TProperties.Type.C_LEVEL) {
+                ProjectCofig.type = type;
+                for (int i = start; i < end; i++) {
+                    ProjectCofig.seed = i;
+                    resettingStaticParameter();
+                    makespan.add(test(ProjectCofig.path, false));
+                }
+                System.out.print(String.format("%.2f", mean(makespan)) + " ");
+            }
+        }
+        return mean(makespan);
+    }
+
     private static void resettingStaticParameter() {
         VM_Public.idInterval = 0;
         VM_Private.idInterval = 0;
     }
 
-    private static void calMakespan() throws IOException {
+    public static void calMakespan() throws IOException {
         TProperties.Type[] types = TProperties.Type.values();
         System.out.println();
         for (TProperties.Type type : types) {
@@ -132,7 +151,7 @@ public class Evaluation {
             if (ProjectCofig.adaptorType == 2 && (ProjectCofig.type == TProperties.Type.PEFT || ProjectCofig.type == TProperties.Type.IPPTS))
                 continue;
             //1000genome
-            for (int i = 0; i < 1; i++) {
+            for (int i = 0; i < 50; i++) {
                 resettingStaticParameter();
                 ProjectCofig.seed = i;
                 makespan.add(test(ProjectCofig.path, false));
@@ -152,7 +171,7 @@ public class Evaluation {
         }
     }
 
-    private static Double test(String file, boolean visualizeFlag)
+    public static Double test(String file, boolean visualizeFlag)
             throws IOException {
         Workflow wf = new Workflow(file);
         List<CSolution> list = new ArrayList<CSolution>();
@@ -163,7 +182,7 @@ public class Evaluation {
 
         list.add(ccsh.listSchedule(wf, ProjectCofig.type, ProjectCofig.adaptorType));
         long t2 = System.currentTimeMillis();
-        System.out.println("runTime: " +  (t2-t1));
+        //System.out.println("runTime: " +  (t2-t1));
         String result = "";
 
         String runtime = "";

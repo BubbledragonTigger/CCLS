@@ -25,8 +25,6 @@ public class TProperties extends HashMap<Task,Double> implements Comparator<Task
         //需要后期改
         /*
         double speed= VM.SPEEDS[VM.FASTEST];  // VM.SPEEDS[4];
-
-
          */
         double speed=VM.SPEEDS[VM.FASTEST];;
         if(type == Type.B_LEVEL){
@@ -36,12 +34,12 @@ public class TProperties extends HashMap<Task,Double> implements Comparator<Task
                     Task task = wf.get(j);
                     for (Edge outEdge : task.getOutEdges()) {
                         Double childBLevel = this.get(outEdge.getDestination());
-//                        bLevel = Math.max(bLevel,childBLevel + (outEdge.getDataSize() / VM.NETWORK_SPEED+
-//                            outEdge.getDataSize() /Channel.getTransferSpeed())/2);
-                        bLevel = Math.max(bLevel, childBLevel + outEdge.getDataSize() / VM.NETWORK_SPEED);
+                        bLevel = Math.max(bLevel,childBLevel + (outEdge.getDataSize() / VM.NETWORK_SPEED+
+                            outEdge.getDataSize() /Channel.getTransferSpeed())/2);
+                        //bLevel = Math.max(bLevel, childBLevel + outEdge.getDataSize() / VM.NETWORK_SPEED);
                     }
-                    bLevel = bLevel + (task.getTaskSize() / VM_Public.SPEEDS[VM_Public.FASTEST]+
-                        task.getTaskSize()/VM_Private.SPEEDS[VM_Private.SLOWEST])/2;
+                    bLevel = bLevel + (task.getTaskSize() / VM_Public.SPEEDS[VM_Public.FASTEST]);/*+
+                        task.getTaskSize()/VM_Private.SPEEDS[VM_Private.SLOWEST])/2;*/
                 /*if(task.getprivateAttribute()==true){
                     bLevel = bLevel + task.getTaskSize()/VM_Private.SPEEDS[VM_Private.SLOWEST];
                 }
@@ -63,13 +61,7 @@ public class TProperties extends HashMap<Task,Double> implements Comparator<Task
                         bLevel = Math.max(bLevel, childBLevel + outEdge.getDataSize() / VM.NETWORK_SPEED);
                     }
                     bLevel = bLevel + task.getTaskSize() / VM_Public.SPEEDS[VM_Public.FASTEST];
-                           /* + task.getTaskSize()/VM_Private.SPEEDS[VM_Private.SLOWEST])/2;*/
-                    /*if (task.getprivateAttribute() == true) {
-                        bLevel = bLevel + task.getTaskSize() / VM_Private.SPEEDS[VM_Private.SLOWEST];
-                    } else {
-                        bLevel = bLevel + (task.getTaskSize() / VM_Private.SPEEDS[VM_Private.SLOWEST]
-                                + task.getTaskSize() / VM_Public.SPEEDS[VM_Public.FASTEST]) / 2;
-                    }*/
+
                     this.put(task, bLevel);
                 }
             }

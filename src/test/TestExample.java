@@ -16,6 +16,7 @@ public class TestExample {
     }
     private static  void testIllustrativeExamples() throws IOException {
         Evaluation e = new Evaluation();
+
         System.out.println(e.test(ProjectCofig.path,false));
     }
 }

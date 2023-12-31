@@ -1,6 +1,5 @@
 package contentionAware;
 
-import com.sun.scenario.effect.impl.sw.sse.SSEBlend_SRC_OUTPeer;
 import setting.*;
 
 import java.io.IOException;
@@ -148,6 +147,7 @@ public class Evaluation {
                 continue;
             ProjectCofig.type = type;
             List<Double> makespan = new ArrayList<>();
+            //ProjectCofig.avaerageMakespanBasedOnShared = new ArrayList<>();
             if (ProjectCofig.adaptorType == 2 && (ProjectCofig.type == TProperties.Type.PEFT || ProjectCofig.type == TProperties.Type.IPPTS))
                 continue;
             //1000genome
@@ -176,11 +176,11 @@ public class Evaluation {
         Workflow wf = new Workflow(file);
         List<CSolution> list = new ArrayList<CSolution>();
 
-        CCSH ccsh = new CCSH();
+        CCLS ccls = new CCLS();
         long t1 = System.currentTimeMillis();
 
 
-        list.add(ccsh.listSchedule(wf, ProjectCofig.type, ProjectCofig.adaptorType));
+        list.add(ccls.listSchedule(wf, ProjectCofig.type, ProjectCofig.adaptorType));
         long t2 = System.currentTimeMillis();
         //System.out.println("runTime: " +  (t2-t1));
         String result = "";
@@ -199,7 +199,7 @@ public class Evaluation {
         String[] rtnValues = {result, runtime};
         list.clear();
 
-        return ccsh.getMakespan();
+        return ccls.getMakespan();
     }
 
 

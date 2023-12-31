@@ -29,7 +29,7 @@ public class ProjectCofig {
 
 
     //控制调用的列表调度方法
-    public static TProperties.Type type = TProperties.Type.C_LEVEL;
+    public static TProperties.Type type = TProperties.Type.B_LEVEL;
 
     //控制是否复制调度
     // @param type = 0: no ne

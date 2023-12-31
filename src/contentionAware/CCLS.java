@@ -9,7 +9,7 @@ import setting.*;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
-public class CCSH {
+public class CCLS {
     private CSolution csolution;
 
     //记录边分配策略

@@ -13,10 +13,10 @@ import java.io.IOException;
 public class testMakeSpan {
     public static void main(String[] args) {
         //choose workflow
-        ProjectCofig.path = "D:\\\\pegasus-instances-master\\\\epigenomics\\\\chameleon-cloud\\\\epigenomics-chameleon-hep-2seq-100k-001.json";
+        ProjectCofig.path = "D:\\\\workflowSamples\\\\MONTAGE\\\\MONTAGE.n.50.0.dax";
 
-        //testMakespanWithoutTaskDuplication();
-        testMakespanwithTaskDuplication();
+        testMakespanWithoutTaskDuplication();
+        //testMakespanwithTaskDuplication();
     }
 
     private static void testMakespanWithoutTaskDuplication(){
